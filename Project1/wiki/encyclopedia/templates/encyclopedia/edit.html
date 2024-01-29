@@ -1,0 +1,20 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    Edit
+{% endblock %}
+
+{% block body %}
+    {% if entry_name != None %}
+    <h1>Edit entry:</h1>
+        <form action="{% url 'wiki:edit' %}?q={{entry_name}}" method="post">
+            {{ form }}
+            {% csrf_token %}
+            <input type="submit" value="Save changes">
+        </form>
+    {% else %}
+        <h2>error: entry not found</h2>
+    {% endif %}
+
+
+{% endblock %}

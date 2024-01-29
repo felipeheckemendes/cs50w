@@ -1,0 +1,18 @@
+{% extends "encyclopedia/layout.html" %}
+
+{% block title %}
+    {{entry_name.capitalize}}
+{% endblock %}
+
+{% block body %}
+    {% if content != None %}
+        {{content|safe}}
+        <form action="{% url 'wiki:edit' %}">
+            <input type="hidden" name="q" value="{{ entry_name }}"/>
+            <input type="submit" value="Edit entry">
+        </form>
+    {% else %}
+        <h2>error: entry not found</h2>
+    {% endif %}
+
+{% endblock %}
