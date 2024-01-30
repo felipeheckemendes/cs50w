@@ -2,6 +2,14 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-
-    TODO
+    {% for listing in open_listings %}
+        <h3><a href='listing/{{listing.pk}}' >{{ listing.title }}</a></h3>
+        {% if listing.current_bid == null %}
+        <p>Current price: {{ listing.starting_bid }} </p>
+        {% else %}
+        <p>Current price: {{ listing.current_bid }}</p>
+        {% endif %}
+        <p>Description: {{ listing.description }}</p>
+        <img src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
+    {% endfor %}
 {% endblock %}
