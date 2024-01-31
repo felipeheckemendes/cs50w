@@ -13,8 +13,16 @@ from django.contrib import messages
 
 def index(request):
     open_listings = models.Listing.objects.filter(status='OP')
+    if request.user.is_authenticated:
+        watchlist = list(request.user.watchlist.all().values_list('pk', flat=True))
+        current_bidder_list = list(request.user.leading_bid_listings.all().values_list('pk', flat=True))
+    else:
+        watchlist = []
+        current_bidder_list = []
     return render(request, "auctions/index.html",{
-        "open_listings": open_listings
+        "open_listings": open_listings,
+        "watchlist": watchlist,
+        "current_bidder_list": current_bidder_list,
     })
 
 
@@ -93,6 +101,14 @@ def create_listing(request): #ERROR HANDLING PENDING
     
 
 def listing(request, pk):
+    #Listing and bidding winner lists
+    if request.user.is_authenticated:
+        watchlist = list(request.user.watchlist.all().values_list('pk', flat=True))
+        current_bidder_list = list(request.user.leading_bid_listings.all().values_list('pk', flat=True))
+    else:
+        watchlist = []
+        current_bidder_list = []    
+    
     #Loads the listing on a variable 'listing', using as reference the primary key informed in url
     listing = models.Listing.objects.get(pk=pk)
 
@@ -155,13 +171,24 @@ def listing(request, pk):
             'bidding_form': forms.BiddingForm,
             'comment_form': forms.CommentForm,
             'comment_list': comment_list,
+            'watchlist': watchlist,
+            'current_bidder_list': current_bidder_list,
         })
     
 
 def watchlist(request):
+    if request.user.is_authenticated:
+        watchlist = list(request.user.watchlist.all().values_list('pk', flat=True))
+        current_bidder_list = list(request.user.leading_bid_listings.all().values_list('pk', flat=True))
+    else:
+        watchlist = []
+        current_bidder_list = []
     return render(request, "auctions/watchlist.html",{
-        'watchlist': request.user.watchlist.filter(status='OP')
+        'watchlist_listings': request.user.watchlist.filter(status='OP'),
+        'watchlist': watchlist,
+        'current_bidder_list': current_bidder_list,
     })
+
 
 def categories(request):
     category_list = models.AuctionCategory.objects.all()
@@ -170,11 +197,19 @@ def categories(request):
         'category_list':category_list
     })
 
+
 def category_listings(request, category_name):
-    print("Category_name: "+ category_name)
+    if request.user.is_authenticated:
+        watchlist = list(request.user.watchlist.all().values_list('pk', flat=True))
+        current_bidder_list = list(request.user.leading_bid_listings.all().values_list('pk', flat=True))
+    else:
+        watchlist = []
+        current_bidder_list = []    
     listings_on_category = models.Listing.objects.filter(category=category_name)
     print(listings_on_category)
     return render(request, "auctions/category_listings.html",{
         'category_name': category_name,
         'listings_on_category': listings_on_category,
+        'watchlist': watchlist,
+        'current_bidder_list': current_bidder_list,
     })
