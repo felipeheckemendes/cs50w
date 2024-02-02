@@ -1,0 +1,35 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+   <h2>Listings on category {{ category_name }}:</h2>
+    {% for listing in listings_on_category %}
+        <div class="listing-parent">
+            <div class="listing-image-div">
+                <img src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
+            </div>
+            <div class="listing-content-div">
+                <div class="listing-title-parent">
+                    <div class="listing-title-div">
+                        <h3><a href="{% url 'listing' pk=listing.pk %}" >{{ listing.title }}</a></h3>
+                    </div>
+                    {% if listing.pk in watchlist %}
+                    <div class="listing-title-watching">
+                        Watching
+                    </div>
+                    {% endif %}
+                    {% if listing.pk in current_bidder_list %}
+                    <div class="listing-title-bidder">
+                        You are winning
+                    </div>
+                    {% endif %}
+                </div>
+                {% if listing.current_bid == null %}
+                    <div class="listing-current-price">${{ listing.starting_bid }} </div>
+                {% else %}
+                    <p class="listing-current-price">${{ listing.current_bid }}</p>
+                {% endif %}
+                <p class="listing-description">{{ listing.description }}</p>
+            </div>
+        </div>
+    {% endfor %}
+{% endblock %}

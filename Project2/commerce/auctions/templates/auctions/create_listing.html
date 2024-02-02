@@ -1,0 +1,18 @@
+{% extends "auctions/layout.html"  %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+    <form action="" method="post" enctype="multipart/form-data">
+        {{ listing_creation_form }}
+        {% csrf_token %}
+        <input type="submit" value="Create new listing">
+    </form>
+    {% else %}
+        <p>You need to login in order to create a new listing.</p>
+    {% endif %}
+
+    {% if error_message is not null %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+
+{% endblock %}

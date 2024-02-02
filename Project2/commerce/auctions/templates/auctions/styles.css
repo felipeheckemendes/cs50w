@@ -1,0 +1,84 @@
+<style>
+.page-content {
+    background-color:white;
+    margin:20px;
+    border-radius:15px;
+    padding:30px;
+    padding-top:15px;
+}
+
+body {
+    margin-left: 15%; /* Adjust as needed */
+    margin-right: 15%; /* Adjust as needed */
+    background-color: #F5F5F5;
+}
+
+
+.listing-parent {
+    display: flex;
+    flex-direction: row;
+    margin-bottom: 30px;
+}
+
+.listing-image-div {
+    width: 250px; /* Adjust as needed */
+    height: 150px;
+}
+
+.listing-image-div img{
+    object-fit: contain;
+    width: 100%;
+    height: 100%;
+}
+
+.listing-content-div {
+    flex-grow: 1;
+}
+
+.listing-title-parent{
+    display: flex;
+    flex-direction: row;
+}
+
+.listing-title-div{
+
+}
+
+.listing-title-watching{
+    background-color: #1260CC;
+    color:white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 15px/* same as the height of the div */;
+    height: 21px;
+    padding: 3px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.listing-title-bidder{
+    background-color: #437a37;
+    color:white;
+    font-size: 12px;
+    font-weight: bold;
+    border-radius: 8px;
+    text-align: center;
+    line-height: 15px/* same as the height of the div */;
+    height: 21px;
+    padding: 3px;
+    padding-left: 12px;
+    padding-right: 12px;
+    margin-left: 20px;
+    margin-bottom: 10px;
+}
+
+.listing-current-price{
+    font-size: 20px;
+    font-weight: bold;
+}
+
+</style>

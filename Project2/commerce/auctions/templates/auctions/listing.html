@@ -1,0 +1,98 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+
+{% for message in messages %}
+<p>Message: {{ message }}</p>
+{% endfor %}
+<div class="listing-parent">
+    <div class="listing-image-div">
+        <img src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
+    </div>
+    <div class="listing-content-div">
+        <div class="listing-title-parent">
+            <div class="listing-title-div">
+                <h3>{{ listing.title }}</h3>
+            </div>
+            {% if listing.pk in watchlist %}
+            <div class="listing-title-watching">
+                Watching
+            </div>
+            {% endif %}
+            {% if listing.pk in current_bidder_list %}
+            <div class="listing-title-bidder">
+                You are winning
+            </div>
+            {% endif %}
+        </div>
+        {% if listing.current_bid == null %}
+            <div class="listing-current-price">${{ listing.starting_bid }} </div>
+        {% else %}
+            <p class="listing-current-price">${{ listing.current_bid }}</p>
+        {% endif %}
+        <p class="listing-description">{{ listing.description }}</p>
+    </div>
+</div>
+
+        <!--CLOSING ORDER-->
+        {% if user.is_authenticated  and user == listing.owner and listing.current_bid != null and listing.status == 'OP' %}
+            <hr>
+            <h3>Close auction:</h1>
+            <form action="" method="post">
+                {% csrf_token %}
+                <input type="submit" value="Close auction" name="close_auction">
+            </form>
+        {% endif %}
+
+        <!--YOU HAVE WON-->
+        {% if user.is_authenticated  and user == listing.winner and listing.status == 'CL' %}
+            <hr>
+            <h3>Congratulations, you have won this auction!</h3>
+        {% endif %}
+
+        <!--#BIDDING-->
+        {% if user.is_authenticated  and listing.status == 'OP' %} <!--and user != listing.owner-->
+        <hr>
+        <h3>Make your bid:</h3>
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{ bidding_form }}
+                <input type="submit" value="Make bid" name="make_bid">
+            </form>
+        {% endif %}
+
+        <!--#WATCHLIST-->
+        {% if user.is_authenticated %} <!--and user != listing.owner-->
+        <hr>
+        <h3>Watchlist:</h3>
+            {% if not is_watching %}
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" value="Add to watchlist" name="add_watchlist">
+                </form>
+            {%  elif is_watching %}
+                <form action="" method="POST">
+                    {% csrf_token %}
+                    <input type="submit" value="Remove from watchlist" name="remove_watchlist">
+                </form>
+            {% endif %}
+        {% endif %}
+
+        <!--#COMMENTS-->
+        <hr>
+        <h3>Comments:</h3>
+        <ul>
+        {% for comment in comment_list %}
+            <li>{{ comment }}</li>    
+        {% endfor %}
+        </ul>
+        {% if user.is_authenticated %}
+            <form action="" method="POST">
+                {% csrf_token %}
+                {{ comment_form }}
+                <input type="submit" value="Add comment" name="add_comment">
+            </form>
+        {% endif %}
+
+        
+{% endblock %}

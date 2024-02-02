@@ -1,0 +1,39 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    {% if user.is_authenticated %}
+        <h2>Watchlist for user: {{ user.username }} </h2>
+        {% for listing in watchlist_listings %}
+        <div class="listing-parent">
+            <div class="listing-image-div">
+                <img src="{{ listing.image.url }}" alt="Image of {{ listing.title }}">
+            </div>
+            <div class="listing-content-div">
+                <div class="listing-title-parent">
+                    <div class="listing-title-div">
+                        <h3><a href="{% url 'listing' pk=listing.pk %}" >{{ listing.title }}</a></h3>
+                    </div>
+                    {% if listing.pk in watchlist %}
+                    <div class="listing-title-watching">
+                        Watching
+                    </div>
+                    {% endif %}
+                    {% if listing.pk in current_bidder_list %}
+                    <div class="listing-title-bidder">
+                        You are winning
+                    </div>
+                    {% endif %}
+                </div>
+                {% if listing.current_bid == null %}
+                    <div class="listing-current-price">${{ listing.starting_bid }} </div>
+                {% else %}
+                    <p class="listing-current-price">${{ listing.current_bid }}</p>
+                {% endif %}
+                <p class="listing-description">{{ listing.description }}</p>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <h2>You are not logged-in. Please login in order to view your watchlist.</h2>
+    {% endif %}
+{% endblock %}
