@@ -4,12 +4,42 @@ textarea {
 
 .email-item {
     display:flex;
+    padding: 5px;
+    border-radius: 5px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #0980FF;
+    margin: 5px;
 }
 
 .email-read {
-    background-color:lightgrey;
+    background-color:whitesmoke;
 }
 
 .email-unread {
-    background-color:whitesmoke;
+    background-color:white;
+}
+
+.email-sender {
+    width: auto;
+    padding-right: 30px;
+    font-weight: bold;
+}
+
+.email-subject {
+    width: 45%;
+}
+
+.email-timestamp {
+    flex-grow: 1;
+    text-align: right;
+}
+
+.message-info {
+    
+    margin-bottom: 15px;
+}
+
+.message-headings {
+    font-weight: bold;
 }
