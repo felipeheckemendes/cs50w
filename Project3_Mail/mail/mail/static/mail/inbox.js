@@ -255,4 +255,4 @@ function load_email(element, mailbox){
       On this project, this logic was used on the eventListener for clicking on an email
       item on the mailboxes (lines 175-178). On this case, we needed to add a different eventListener
       for each email item, and when clicked, pass the email id of the clicked element to
-      the load_email function.
+      the load_email function.*/
