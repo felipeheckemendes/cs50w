@@ -1,0 +1,24 @@
+[33mcommit f35f99f33221dea167175503015eb49aa74401ca[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m)[m
+Merge: fd69a35 09ef025
+Author: felipeheckemendes <fheckemendes@gmail.com>
+Date:   Wed Jan 24 09:06:51 2024 -0300
+
+    Fix merge conflict
+
+[33mcommit 09ef0256e714a48dc225e189374541b733bec342[m
+Author: felipeheckemendes <157503990+felipeheckemendes@users.noreply.github.com>
+Date:   Wed Jan 24 09:02:28 2024 -0300
+
+    Add style
+
+[33mcommit fd69a352f7db20b52317d8f97fa9f7b342753cd3[m
+Author: felipeheckemendes <fheckemendes@gmail.com>
+Date:   Wed Jan 24 09:01:02 2024 -0300
+
+    Add exclamation points
+
+[33mcommit 783fae7eaebfbcf6cb77eafda87d766eef3e632a[m
+Author: felipeheckemendes <fheckemendes@gmail.com>
+Date:   Tue Jan 23 21:48:06 2024 -0300
+
+    Added index.html file
