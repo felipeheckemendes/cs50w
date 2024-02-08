@@ -20,7 +20,7 @@ class User(AbstractUser):
                 inverse_match=True)
         ]
     )
-    following = models.ManyToManyField('self', blank=True)
+    following = models.ManyToManyField('self', blank=True, symmetrical=False, related_name="followers")
 
 class Post(models.Model):
     content = models.CharField(max_length=500)
@@ -29,13 +29,15 @@ class Post(models.Model):
     updated_timestamp = models.DateTimeField(auto_now = True)
     likers = models.ManyToManyField(User, blank=True, related_name="liked_posts")
 
-    def serialize(self):
+    def serialize(self, user):
         return {
             "id": self.pk,
             "content": self.content,
             "creator": self.creator.username,
             "timestamp": self.timestamp.strftime("%b %d %Y, %I:%M %p"),
             "updated_timestamp": self.updated_timestamp.strftime("%b %d %Y, %I:%M %p"),
-            "number_of_likes": self.likers.all().count()
+            "number_of_likes": self.likers.all().count(),
+            "liked": user in self.likers.all(),
+            "is_creator": user == self.creator,
         }
 

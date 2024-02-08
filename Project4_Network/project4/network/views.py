@@ -12,6 +12,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 
 from .models import User, Post
 
@@ -94,8 +95,13 @@ def register(request):
 
 
 def user_view(request, user_id):
+    user = User.objects.get(username=user_id)
     return render(request, "network/user.html", {
-        'username': request.user.username
+        'username': user,
+        'number_of_following': user.following.all().count(),
+        'number_of_followers': user.followers.all().count(),
+        'is_being_followed': user.followers.filter(username=request.user.username).exists(),
+        'is_my_profile': user == request.user,
     })
 
 
@@ -129,12 +135,42 @@ def create_post(request):
     return JsonResponse({"message": "Post created successfully."}, status=201)
 
 
-def like(request):
-    pass
+def edit_post(request):
+    # Creating a new post must be via POST
+    if request.method != "POST":
+        return JsonResponse({"error": "POST request required."}, status=400)
+
+    # Convert POST to python dictionary
+    data = json.loads(request.body)
+    
+    # Check if the content of the post is not None and create the post
+    post_content = data.get("post_content")
+    post_id = data.get("post_id")
+    if post_content != None:
+        #post = Post(content=post_content, creator=request.user)
+        post = Post.objects.get(pk=post_id)
+        post.content = post_content
+        post.save()
+        messages.success(request, "Post edited succesfully.")
+    else:
+        messages.error(request, "Post must have some content.")
+        return JsonResponse({"message": "Post not edited. Post must not be blank."}, status=400)
+    return JsonResponse({"message": "Post edited successfully."}, status=201)
 
 
 def follow(request):
-    pass
+    
+    if request.method == "PUT":
+        data = json.loads(request.body)
+        user = User.objects.get(username=data.get("username"))
+        # If request is to 'follow', and user is not following yet: add a follow relation.
+        if data.get("follow") == True and not user.followers.filter(username=request.user.username).exists():
+            request.user.following.add(user)
+        # If request is to 'unlike', and there is 'like' already: remove a new like.
+        if data.get("follow") == False and user.followers.filter(username=request.user.username).exists():
+            request.user.following.remove(user)
+        user.save()
+        return HttpResponse(status=204)
 
 @csrf_exempt
 def get_posts(request):
@@ -149,7 +185,7 @@ def get_posts(request):
         posts = Post.objects.all()
     elif subset == "following":
         print("Passou o teste do following")
-        following = User.objects.filter(following=request.user)
+        following = User.objects.filter(followers=request.user)
         print(following)
         posts = Post.objects.filter(creator__in=following)
         print(posts)
@@ -162,7 +198,7 @@ def get_posts(request):
         return JsonResponse({"error": "Subset argument should be either 'all', 'following', 'from_user'. If 'from_user', you should specify a username on argument 'creator'"}, status=400)
     
     posts = posts.order_by('-timestamp')
-    return JsonResponse([post.serialize() for post in posts], safe=False)
+    return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
     
 
 
