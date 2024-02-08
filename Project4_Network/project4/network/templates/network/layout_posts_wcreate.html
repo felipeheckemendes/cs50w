@@ -1,0 +1,22 @@
+{% extends "network/layout_posts.html" %}
+
+
+
+{% block create-post %}
+{% if user.is_authenticated %}
+<div class="card mx-3 mt-3 bg-light">
+    <div class="card-body">
+        <form id="new-post-form" method="post">
+            {% csrf_token %}
+            <h4>New post</h4>
+            <textarea type="text" class="form-control mb-2" placeholder="What would you like to post?" id="new-post-content" rows="2"></textarea>
+            <div class="d-grid gap-2 mb-3">
+                <button type="submit" class="btn btn-primary">Post</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+
+{% endblock %}
