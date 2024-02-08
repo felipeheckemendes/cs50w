@@ -111,7 +111,7 @@ function send_email(){
           recipients: recipients,
           subject: subject,
           body: body
-      })
+      }),
     })
     .then(response => response.json())
     .then(result => {

@@ -78,7 +78,7 @@ def register(request):
         return render(request, "auctions/register.html")
 
 
-def create_listing(request): #ERROR HANDLING PENDING
+def create_listing(request):
     if request.method == "POST":
         form = forms.ListingCreationForm(request.POST, request.FILES)
         if form.is_valid():
@@ -87,7 +87,7 @@ def create_listing(request): #ERROR HANDLING PENDING
             listing.save()
             return redirect('index')
         else:
-            #ADD ERROR HANDLING URL
+            #If form is not valid, render again the form with the inputs already done, and display error message.
             print(form.errors)
             return render(request, "auctions/create_listing.html",{
                 'listing_creation_form': forms.ListingCreationForm(request.POST, request.FILES),
@@ -109,7 +109,7 @@ def listing(request, pk):
         watchlist = []
         current_bidder_list = []    
     
-    #Loads the listing on a variable 'listing', using as reference the primary key informed in url
+    #Loads the listing on a variable 'listing', using as reference the primary key pk informed in url
     listing = models.Listing.objects.get(pk=pk)
 
     #check to see if current user is watching the
@@ -145,7 +145,7 @@ def listing(request, pk):
                     else:
                         bidding.bid_order = 1
                     bidding.save()
-                    messages.error(request, 'Bid succesful.')
+                    messages.success(request, 'Bid succesful.')
                 else:
                     messages.error(request, 'Your bid must be higher than current offer.')
         if 'add_comment' in request.POST:
@@ -204,7 +204,7 @@ def category_listings(request, category_name):
         current_bidder_list = list(request.user.leading_bid_listings.all().values_list('pk', flat=True))
     else:
         watchlist = []
-        current_bidder_list = []    
+        current_bidder_list = []
     listings_on_category = models.Listing.objects.filter(category=category_name)
     print(listings_on_category)
     return render(request, "auctions/category_listings.html",{
