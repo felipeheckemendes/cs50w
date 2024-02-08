@@ -178,6 +178,7 @@ def get_posts(request):
         return JsonResponse({"error": "GET request required."}, status=400)
     subset = request.GET.get('subset')
     creator = request.GET.get('creator')
+    page_number = request.GET.get('page_number', 1)
     print(subset)
     print(creator)
     if subset == "all":
@@ -198,7 +199,18 @@ def get_posts(request):
         return JsonResponse({"error": "Subset argument should be either 'all', 'following', 'from_user'. If 'from_user', you should specify a username on argument 'creator'"}, status=400)
     
     posts = posts.order_by('-timestamp')
-    return JsonResponse([post.serialize(request.user) for post in posts], safe=False)
+    
+    paginator = Paginator(posts, 10)
+    page = paginator.get_page(page_number)
+    num_pages = paginator.num_pages
+
+    data = {
+        'results': [post.serialize(request.user) for post in page],
+        'current_page': page_number,
+        'total_pages': num_pages
+    }
+
+    return JsonResponse(data, safe=False)
     
 
 

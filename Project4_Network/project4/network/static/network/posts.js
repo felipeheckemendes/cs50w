@@ -19,15 +19,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     if (path_array === '/'){
         // Feed all posts
-        feed_posts("all");
+        feed_posts("all", 1);
     } else if (path_array === '/following') {
         // Feed following posts
-        feed_posts("following");
+        feed_posts("following", 1);
     } else if (path_array.split('/')[1] === 'user') {
         // Feed the posts from selected user
         console.log(path_array.split('/')[1]);
         console.log(path_array.split('/')[2]);
-        feed_posts("from_user", path_array.split('/')[2]);
+        feed_posts("from_user", 1, path_array.split('/')[2]);
     }
 
 })
@@ -131,17 +131,26 @@ function follow(username){
 
 }
 
-function feed_posts(subset, creator=null) { 
+function feed_posts(subset, page_number, creator=null) { 
+    // Clear the DOM
+    element = document.querySelector('#posts-feed')
+    while(element.firstChild) { element.removeChild(element.firstChild); }
+    element = document.querySelector('#page-turner')
+    while(element.firstChild) { element.removeChild(element.firstChild); }
+    
     // GET to request to receive the posts
-    fetch(`/get_posts?subset=${subset}&creator=${creator}`)
+    console.log(`/get_posts?subset=${subset}&creator=${creator}&page_number=${page_number}`)
+    fetch(`/get_posts?subset=${subset}&creator=${creator}&page_number=${page_number}`)
     .then(response => response.json())
-    .then(posts => { 
-        if (posts.error == "Subset argument should be either 'all', 'following', 'from_user'. If 'from_user', you should specify a username on argument 'creator'"){
+    .then(data => { 
+        if (data.error == "Subset argument should be either 'all', 'following', 'from_user'. If 'from_user', you should specify a username on argument 'creator'"){
             console.log("Eroooooooo")
             // Else (if no error)
         } else {
             console.log("SUCESSO")
             // For each post, add card, and handle interactions on card
+            console.log(data)
+            posts = data.results;
             for (var i = 0; i < posts.length; i++) {
                 console.log(posts[i]);
                 card = create_post_html(posts[i].id, posts[i].creator, posts[i].timestamp, posts[i].content, posts[i].number_of_likes, posts[i].liked, posts[i].is_creator);
@@ -238,6 +247,79 @@ function feed_posts(subset, creator=null) {
                     //*/
                 document.querySelector('#posts-feed').append(card);
             }
+            // Create and append page turner
+            page_turner_nav = document.createElement('nav')
+            page_turner_nav.setAttribute('aria-label', "Page navigation example")
+            page_turner_ul = document.createElement('ul')
+            page_turner_ul.className = "pagination justify-content-center"
+            page_turner_nav.append(page_turner_ul)
+            document.querySelector('#page-turner').append(page_turner_nav)
+
+            //Create previous link
+            page_item = document.createElement('li');
+            page_item.className = "page-item";
+            page_link = document.createElement('a')
+            page_link.className = "page-link"
+            page_link.innerHTML = "<";
+            page_item.id = "page-button"
+            page_link.setAttribute('data-page-no', parseInt(page_number)-1)
+            page_item.append(page_link);
+            document.querySelector('.pagination').append(page_item);
+            if (page_number!=1){
+                page_item.addEventListener('click', function(event){
+                    console.log('EVENT TARGET')
+                    console.log(event.target);
+                    console.log(`${subset} - ${event.target.getAttribute('data-page-no')}`)
+                    feed_posts(subset, event.target.getAttribute('data-page-no'), creator)
+                })
+            } else {
+                page_item.classList.add("disabled")
+            }
+
+
+            for (var i = 0; i < data.total_pages; i++){
+                console.log(`${i+1} iteration`)
+                page_item = document.createElement('li');
+                page_item.className = "page-item";
+                if (i+1 == page_number){
+                    page_item.classList.add("active")
+                }
+                page_link = document.createElement('a')
+                page_link.className = "page-link"
+                page_link.innerHTML = i+1;
+                page_item.id = "page-button"
+                page_link.setAttribute('data-page-no', i+1)
+                page_item.append(page_link);
+                document.querySelector('.pagination').append(page_item);
+                if (i+1 != page_number){
+                    page_item.addEventListener('click', function(event){
+                        console.log('EVENT TARGET')
+                        console.log(event.target);
+                        feed_posts(subset, event.target.getAttribute('data-page-no'), creator)
+                    })
+                }
+            }
+
+            //Create next link
+            page_item = document.createElement('li');
+            page_item.className = "page-item";
+            page_link = document.createElement('a')
+            page_link.className = "page-link"
+            page_link.innerHTML = ">";
+            page_item.id = "page-button"
+            page_link.setAttribute('data-page-no', parseInt(page_number)+1)
+            page_item.append(page_link);
+            document.querySelector('.pagination').append(page_item);
+            if (page_number!=i){
+                page_item.addEventListener('click', function(event){
+                    console.log('EVENT TARGET')
+                    console.log(event.target);
+                    feed_posts(subset, event.target.getAttribute('data-page-no'), creator)
+                })
+            } else {
+                page_item.classList.add("disabled")
+            }
+
         }
     })
 };
