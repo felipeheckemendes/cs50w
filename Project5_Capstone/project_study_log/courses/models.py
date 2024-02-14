@@ -50,10 +50,22 @@ class Category(models.Model):
     #
     # Attributes
     name = models.CharField(max_length=NAME_LENGTH)
-    description = models.CharField(max_length=DESCRIPTION_LENGTH)
+    description = models.CharField(max_length=DESCRIPTION_LENGTH, null=True, blank=True)
     #
     # Relations
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+    
+    def serialize(self, user):
+        return {
+            "id": self.pk,
+            "name": self.name,
+            "description": self.description,
+            "user": self.user.email,
+        }
+
 
 
 class Term(models.Model):
@@ -70,6 +82,18 @@ class Term(models.Model):
     #
     # Relations
     user = models.ForeignKey(User, on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.name
+    
+    def serialize(self, user):
+        return {
+            "id": self.pk,
+            "name": self.name,
+            "start_date": self.start_date,
+            "finish_date": self.finish_date,
+            "user": self.user.email,
+        }
 
 
 class Course(models.Model):
@@ -89,6 +113,20 @@ class Course(models.Model):
     category = models.ForeignKey(Category, on_delete=models.PROTECT)
     term = models.ForeignKey(Term, null=True, blank=True, on_delete=models.SET_NULL)
 
+    def __str__(self):
+        return f"{self.name}"
+    
+    def serialize(self, user):
+        return {
+            "id": self.pk,
+            "name": self.name,
+            "website": self.website,
+            "hours_forecast": self.hours_forecast,
+            "status": self.status,
+            "category": self.category.pk,
+            "user": self.category.user.email,
+        }
+
 class CourseSection(models.Model):
     """ Course Content represent sections that need to be completed on a given course."""
     STATUS_CHOICES = [('N', 'Not started'),('S', 'Started'),('F', 'Finished')]
@@ -99,7 +137,21 @@ class CourseSection(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES) # Lecture status will tell if course content is finished, started or not started.    
     #
     # Relations
-    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, on_delete=models.PROTECT)
+
+    def __str__(self):
+        return f"{self.course.name}: {self.name}"
+    
+    def serialize(self, user):
+        return {
+            "id": self.pk,
+            "name": self.name,
+            "website": self.website,
+            "status": self.status,
+            "course": self.course.pk,
+            "category": self.course.category.pk,
+            "user": self.course.category.user.email,
+        }
 
 
 class Lecture(CourseSection):
@@ -134,10 +186,25 @@ class Log(models.Model):
     #
     # Attributes
     type = models.CharField(max_length=2, choices=LOG_TYPES) # Log type should represent the nature of the action user did on given lecture/project
-    date = models.DateTimeField(auto_now_add=True)
+    date = models.DateTimeField(default=timezone.now)
     content = models.CharField(max_length=DESCRIPTION_LENGTH, null=True, blank=True)
     time_spent = models.PositiveIntegerField(null=True, blank=True)
     #
     # Relations
-    course_section = models.ForeignKey(CourseSection, on_delete=models.CASCADE) 
+    course_section = models.ForeignKey(CourseSection, on_delete=models.PROTECT)
 
+    def __str__(self):
+        return f"{self.course_section}: {self.type}, {self.content}"
+    
+    def serialize(self, user):
+        return {
+            "id": self.pk,
+            "type": self.type,
+            "date": self.date,
+            "content": self.content,
+            "time_spent": self.time_spent,
+            "course_section": self.course_section.pk,
+            "course": self.course_section.course.pk,
+            "category": self.course_section.course.category.pk,
+            "user": self.course_section.course.category.user.email,
+        }

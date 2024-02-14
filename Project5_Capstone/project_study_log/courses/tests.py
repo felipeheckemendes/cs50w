@@ -2,7 +2,9 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from .models import User, Category, Term, Course, Lecture, Project, Log, CourseSection
 
-# CATEGORY tests
+
+"""
+# CATEGORY create tests
 class CategoryTestCase(TestCase):
 
     def setUp(self):
@@ -75,7 +77,8 @@ class CategoryTestCase(TestCase):
         self.assertEqual(response.json()['message'], f"Category creation failed: you must log in before creating a new category.", "CASE FAIL 5: Message returned was not the expected one")
         self.assertFalse(Category.objects.filter(name=test_category_name, description =test_category_description).exists(), "CASE FAIL 5: New category was found within the database when was expected not to be")
 
-# TERM test
+
+# TERM create tests
 class TermTestCase(TestCase):
 
     def setUp(self):
@@ -185,7 +188,7 @@ class TermTestCase(TestCase):
                                              ).exists(), "CASE FAIL 5: New term was found within the database when was expected not to be")
         
 
-# COURSE TEST
+# COURSE create tests
 class CourseTestCase(TestCase):
 
     def setUp(self):
@@ -367,7 +370,8 @@ class CourseTestCase(TestCase):
                                               website=website,
                                               ).exists())
 
-#LECTURE test
+
+#LECTURE create tests
 class LectureTestCase(TestCase):
 
     def setUp(self):
@@ -537,8 +541,9 @@ class LectureTestCase(TestCase):
         self.assertFalse(Lecture.objects.filter(name=test_lecture_name, 
                                               course=Course.objects.get(pk=course_id)
                                               ).exists())
-        
-#PROJECT test
+
+
+#PROJECT crate tests
 class ProjectTestCase(TestCase):
 
     def setUp(self):
@@ -710,7 +715,7 @@ class ProjectTestCase(TestCase):
                                               ).exists())
         
 
-#LOG test
+#LOG create tests
 class LogTestCase(TestCase):
 
     def setUp(self):
@@ -961,4 +966,483 @@ class LogTestCase(TestCase):
         self.assertEqual(response.status_code, 400)
         self.assertFalse(Log.objects.filter(content=test_log_content,
                                            time_spent=test_log_time_spent,
-                                           course_section=CourseSection.objects.get(pk=course_section_id)).exists())    
+                                           course_section=CourseSection.objects.get(pk=course_section_id)).exists())
+"""
+
+class CategoryGetTesteCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_user = User.objects.create_user(email='testuser@email.com', password='123456qwe')
+
+    def test_get_categories_sucess(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        response = self.client.get("/get_categories")
+        
+        # CASE SUCCESS 1: Get the categories
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], "Categories retrieved successfully.")
+        self.assertEqual(response.json()['results'][0]['name'], 'Category 1')
+        self.assertEqual(response.json()['results'][1]['description'], 'This is Category 2s description.')
+        self.assertEqual(response.json()['results'][2]['name'], 'Category 3')
+
+    def test_get_categories_fail(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+
+        # CASE FAIL 1: Test if message is correct when no categories have been created
+        response = self.client.get("/get_categories")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], "Categories not retrieved. User has not created any categories yet.")
+
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        # CASE FAIL X: Test if request is not GET
+        response = self.client.post("/get_categories")
+        
+        self.assertEqual(response.status_code, 405)
+        self.assertEqual(response.json()['message'], "Categories not retrieved. GET request required.")
+
+        # CASE FAIL X: Test if not possible to get when user is not logged in
+        self.client.logout()
+        response = self.client.get("/get_categories")
+        
+        self.assertEqual(response.status_code, 401)
+        self.assertEqual(response.json()['message'], "Categories not retrieved. You must log in first.")
+
+
+class CourseGetTesteCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_user = User.objects.create_user(email='testuser@email.com', password='123456qwe')
+
+    def test_get_course_sucess(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        #Create courses
+        test_course_name = "Course 1"
+        website = 'www.mit.com'
+        hours_forecast = 10
+        category_id = 1
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+        
+        test_course_name = "Course 2"
+        website = 'www.harvard.com'
+        hours_forecast = 50
+        category_id = 2
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+
+        # CASE SUCCESS 1: Get the courses
+        response = self.client.get("/get_courses")
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], "Courses retrieved successfully.")
+        self.assertEqual(response.json()['results'][0]['id'], 1)
+        self.assertEqual(response.json()['results'][0]['name'], 'Course 1')
+        self.assertEqual(response.json()['results'][1]['name'], 'Course 2')
+        self.assertEqual(response.json()['results'][1]['website'], 'www.harvard.com')
+
+
+    def test_get_course_fail(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        # CASE FAIL 1: Test if message is correct when no courses were created
+        response = self.client.get("/get_courses")
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], "Courses not retrieved. User has not created any courses yet.")
+
+        #Create courses
+        test_course_name = "Course 1"
+        website = 'www.mit.com'
+        hours_forecast = 10
+        category_id = 1
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+        
+        test_course_name = "Course 2"
+        website = 'www.harvard.com'
+        hours_forecast = 50
+        category_id = 2
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+
+
+class LectureGetTesteCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_user = User.objects.create_user(email='testuser@email.com', password='123456qwe')
+
+    def test_get_lecture_sucess(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        #Create courses
+        test_course_name = "Course 1"
+        website = 'www.mit.com'
+        hours_forecast = 10
+        category_id = 1
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+        
+        test_course_name = "Course 2"
+        website = 'www.harvard.com'
+        hours_forecast = 50
+        category_id = 2
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+
+        # Create Lectures and Projects
+        test_lecture_name = "Lecture 1"
+        test_lecture_website = "www.mit.com/lecture1"
+        course_id = 2
+        post_data = {'name': test_lecture_name, 
+                     'website': test_lecture_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_lecture", post_data, content_type='application/json')
+
+        test_lecture_name = "Lecture 2"
+        test_lecture_website = "www.mit.com/lecture2"
+        course_id = 2
+        post_data = {'name': test_lecture_name, 
+                     'website': test_lecture_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_lecture", post_data, content_type='application/json')
+
+        test_project_name = "Project 1"
+        test_project_website = "www.mit.com/project1"
+        course_id = 1
+        post_data = {'name': test_project_name, 
+                     'website': test_project_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_project", post_data, content_type='application/json')
+
+        test_project_name = "Project 2"
+        test_project_website = "www.mit.com/project2"
+        course_id = 2
+        post_data = {'name': test_project_name, 
+                     'website': test_project_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_project", post_data, content_type='application/json')
+
+        # CASE SUCCESS 1: Get the lectures
+        response = self.client.get("/get_lectures")
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], "Lectures retrieved successfully.")
+        self.assertEqual(response.json()['results'][0]['id'], 1)
+        self.assertEqual(response.json()['results'][0]['name'], 'Lecture 1')
+        self.assertEqual(response.json()['results'][1]['name'], 'Lecture 2')
+        self.assertEqual(response.json()['results'][1]['category'], 2)
+
+        # CASE SUCCESS 1: Get the projects
+        response = self.client.get("/get_projects")
+        
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['message'], "Projects retrieved successfully.")
+        self.assertEqual(response.json()['results'][0]['id'], 3)
+        self.assertEqual(response.json()['results'][0]['name'], 'Project 1')
+        self.assertEqual(response.json()['results'][1]['name'], 'Project 2')
+        self.assertEqual(response.json()['results'][1]['category'], 2)
+
+
+
+class LogGetTesteCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_user = User.objects.create_user(email='testuser@email.com', password='123456qwe')
+
+    def test_get_log_sucess(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        #Create courses
+        test_course_name = "Course 1"
+        website = 'www.mit.com'
+        hours_forecast = 10
+        category_id = 1
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+        
+        test_course_name = "Course 2"
+        website = 'www.harvard.com'
+        hours_forecast = 50
+        category_id = 2
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+
+        # Create Lectures and Projects
+        test_lecture_name = "Lecture 1"
+        test_lecture_website = "www.mit.com/lecture1"
+        course_id = 2
+        post_data = {'name': test_lecture_name, 
+                     'website': test_lecture_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_lecture", post_data, content_type='application/json')
+
+        test_lecture_name = "Lecture 2"
+        test_lecture_website = "www.mit.com/lecture2"
+        course_id = 2
+        post_data = {'name': test_lecture_name, 
+                     'website': test_lecture_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_lecture", post_data, content_type='application/json')
+
+        test_project_name = "Project 1"
+        test_project_website = "www.mit.com/project1"
+        course_id = 1
+        post_data = {'name': test_project_name, 
+                     'website': test_project_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_project", post_data, content_type='application/json')
+
+        test_project_name = "Project 2"
+        test_project_website = "www.mit.com/project2"
+        course_id = 2
+        post_data = {'name': test_project_name, 
+                     'website': test_project_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_project", post_data, content_type='application/json')
+
+        # Create Logs  
+        test_log_type = "ST"
+        test_log_content = "This is my log's content"
+        test_log_time_spent = 90
+        course_section_id = 1
+        post_data = {'type': test_log_type, 
+                     'content': test_log_content,
+                     'time_spent': test_log_time_spent,
+                     'course_section_id': course_section_id
+                     }
+        response = self.client.post("/create_log", post_data, content_type='application/json')
+
+        # CASE SUCCESS 1: Get the logs
+        response = self.client.get("/get_logs")
+        
+        self.assertEqual(response.json()['message'], "Logs retrieved successfully.")
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json()['results'][0]['id'], 1)
+        self.assertEqual(response.json()['results'][0]['time_spent'], 90)
+        self.assertEqual(response.json()['results'][0]['content'], test_log_content)
+        self.assertEqual(response.json()['results'][0]['course_section'], 1)
+        
+        self.client.logout()
+
+
+class DeleteObjectTestCase(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.test_user = User.objects.create_user(email='testuser@email.com', password='123456qwe')
+
+    def test_get_log_sucess(self):
+        self.client.login(email='testuser@email.com', password='123456qwe')
+        # Create categoies
+        test_category_name = "Category 1"
+        test_category_description = "This is Category 1s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 2"
+        test_category_description = "This is Category 2s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+        test_category_name = "Category 3"
+        test_category_description = "This is Category 3s description."
+        response = self.client.post("/create_category", {'name': test_category_name, 'description': test_category_description}, content_type='application/json')
+
+        #Create courses
+        test_course_name = "Course 1"
+        website = 'www.mit.com'
+        hours_forecast = 10
+        category_id = 1
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+        
+        test_course_name = "Course 2"
+        website = 'www.harvard.com'
+        hours_forecast = 50
+        category_id = 2
+        post_data = {'name': test_course_name, 
+                     'website': website, 
+                     'hours_forecast': hours_forecast,
+                     'category_id': category_id,
+                     }
+        response = self.client.post("/create_course", post_data, content_type='application/json')
+
+        # Create Lectures and Projects
+        test_lecture_name = "Lecture 1"
+        test_lecture_website = "www.mit.com/lecture1"
+        course_id = 2
+        post_data = {'name': test_lecture_name, 
+                     'website': test_lecture_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_lecture", post_data, content_type='application/json')
+
+        test_lecture_name = "Lecture 2"
+        test_lecture_website = "www.mit.com/lecture2"
+        course_id = 2
+        post_data = {'name': test_lecture_name, 
+                     'website': test_lecture_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_lecture", post_data, content_type='application/json')
+
+        test_project_name = "Project 1"
+        test_project_website = "www.mit.com/project1"
+        course_id = 1
+        post_data = {'name': test_project_name, 
+                     'website': test_project_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_project", post_data, content_type='application/json')
+
+        test_project_name = "Project 2"
+        test_project_website = "www.mit.com/project2"
+        course_id = 2
+        post_data = {'name': test_project_name, 
+                     'website': test_project_website, 
+                     'course_id': course_id,
+                     }
+        response = self.client.post("/create_project", post_data, content_type='application/json')
+
+        # Create Logs  
+        test_log_type = "ST"
+        test_log_content = "This is my log's content"
+        test_log_time_spent = 90
+        course_section_id = 1
+        post_data = {'type': test_log_type, 
+                     'content': test_log_content,
+                     'time_spent': test_log_time_spent,
+                     'course_section_id': course_section_id
+                     }
+        response = self.client.post("/create_log", post_data, content_type='application/json')
+
+        # CASE SUCCESS 1: Log is deleted
+        response = self.client.post("/delete_object", {'object_model': 'Log', 'id': 1}, content_type='application/json')
+        self.assertEqual(response.json()['message'], "Object deleted.")
+        self.assertFalse(Log.objects.filter(id=1).exists())
+
+        # CASE SUCCES X: Project is deleted
+        response = self.client.post("/delete_object", {'object_model': 'Project', 'id': 3}, content_type='application/json')
+        self.assertEqual(response.json()['message'], "Object deleted.")
+        self.assertFalse(Project.objects.filter(id=3).exists())
+
+        # CASE SUCCES X: Lecture is deleted
+        response = self.client.post("/delete_object", {'object_model': 'Lecture', 'id': 2}, content_type='application/json')
+        self.assertEqual(response.json()['message'], "Object deleted.")
+        self.assertFalse(Lecture.objects.filter(id=2).exists())
+
+        # CASE FAIL X: Lecture is tryed to delete as Project
+        response = self.client.post("/delete_object", {'object_model': 'Project', 'id': 1}, content_type='application/json')
+        #self.assertEqual(response.json()['message'], "Object deleted.")
+        self.assertTrue(Lecture.objects.filter(id=1).exists())
+
+        # CASE FAIL X: Try to delete course while there is a lecture attached
+        response = self.client.post("/delete_object", {'object_model': 'Course', 'id': 2}, content_type='application/json')
+        self.assertEqual(response.json()['message'], "Not possible to delete. Please delete all child objects before deleting object.")
+        self.assertTrue(Course.objects.filter(id=2).exists())
+
+        # CASE FAIL X: Try to delete Category while there is a course attached
+        response = self.client.post("/delete_object", {'object_model': 'Category', 'id': 1}, content_type='application/json')
+        self.assertEqual(response.json()['message'], "Not possible to delete. Please delete all child objects before deleting object.")
+        self.assertTrue(Course.objects.filter(id=1).exists())

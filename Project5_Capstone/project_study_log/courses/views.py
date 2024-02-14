@@ -8,3 +8,7 @@ from datetime import datetime
 # ===================================
 # SECTION 1: Views
 # ===================================
+def index(request):
+    return render(request, "index.html", {
+        'username': request.user.username
+    })
