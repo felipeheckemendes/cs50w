@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from .models import User, Category, Term, Course, Lecture, Project, Log, CourseSection
 
 
-"""
+
 # CATEGORY create tests
 class CategoryTestCase(TestCase):
 
@@ -967,7 +967,7 @@ class LogTestCase(TestCase):
         self.assertFalse(Log.objects.filter(content=test_log_content,
                                            time_spent=test_log_time_spent,
                                            course_section=CourseSection.objects.get(pk=course_section_id)).exists())
-"""
+
 
 class CategoryGetTesteCase(TestCase):
     def setUp(self):

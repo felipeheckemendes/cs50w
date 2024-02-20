@@ -3,9 +3,12 @@ from . import views, json_views
 
 urlpatterns = [
     # Views
+    path("", views.index, name="index"),
+    path("course/<int:course_id>", views.course, name="course"),
+
+
 
     #API Calls
-    path("", views.index, name="index"),
     path("create_category", json_views.create_category, name="create_category"),
     path("create_term", json_views.create_term, name="create_term"),
     path("create_course", json_views.create_course, name="create_course"),

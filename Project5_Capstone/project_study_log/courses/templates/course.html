@@ -1,0 +1,23 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block script %}
+    <script src="{% static 'courses/course.js' %}"></script>
+{% endblock %}
+
+    {% block body %}
+        
+        <div class="row">
+            <p> </p>
+            <h5 class="display-5">{{course_name}}</h5>
+            <div id="course" data-course-id="{{ course_id }}" class="col">
+                <div id="lectures">
+                    <h4>Lectures:</h4>
+                </div>
+                <div id="projects">
+                    <h4>Projects:</h4>
+                </div>
+            </div>
+        </div>
+
+    {% endblock %}

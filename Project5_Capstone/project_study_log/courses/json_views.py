@@ -4,7 +4,8 @@ import json
 from .models import User, Category, Term, Course, Lecture, Project, Log, CourseSection
 from datetime import datetime
 from django.apps import apps
-from django.db.models import ProtectedError
+from django.db.models import ProtectedError, Count, Sum, Q
+
 
 
 # ===================================
@@ -320,6 +321,10 @@ def get_categories(request):
 
     # ERROR HANDLING 3: Check if there is any categories associated with user, return empty list
     categories = Category.objects.select_related('user').filter(user=request.user)
+    categories = categories.annotate(total_time_spent=Sum('course_set__coursesection_set__log_set__time_spent')/60)
+    categories = categories.annotate(total_courses=Count('course_set'))
+    categories = categories.annotate(finished_courses=Count('course_set', filter=Q(course_set__status='F')))
+    categories = categories.annotate(hours_forecast=Sum('course_set__hours_forecast'))
     if not categories.exists():
         return JsonResponse({'results': {},
                              'message': f"{NAME_FOR_MESSAGES} not retrieved. User has not created any categories yet."})
@@ -389,6 +394,11 @@ def get_courses(request):
 
     # ERROR HANDLING 3: Check if there is any courses associated with user
     courses = Course.objects.select_related('category__user').filter(category__user=request.user)
+    courses = courses.annotate(total_lectures=Count('coursesection_set__lecture'))
+    courses = courses.annotate(finished_lectures=Count('coursesection_set__lecture', filter=Q(coursesection_set__status='F')))
+    courses = courses.annotate(total_projects=Count('coursesection_set__project'))
+    courses = courses.annotate(finished_projects=Count('coursesection_set__project', filter=Q(coursesection_set__status='F')))
+    courses = courses.annotate(total_time_spent=Sum('coursesection_set__log_set__time_spent')/60)
     if not courses.exists():
         return JsonResponse({'results': {},
                              "message": f"{NAME_FOR_MESSAGES} not retrieved. User has not created any courses yet."})
@@ -423,6 +433,7 @@ def get_lectures(request):
 
     # ERROR HANDLING 3: Check if there is any data associated with user
     lectures = Lecture.objects.select_related('course__category__user').filter(course__category__user=request.user)
+    lectures = lectures.annotate(total_time_spent=Sum('log_set__time_spent')/60)
     if not lectures.exists():
         return JsonResponse({'results': {},
                              "message": f"{NAME_FOR_MESSAGES} not retrieved. User has not created any lectures yet."})
@@ -457,6 +468,7 @@ def get_projects(request):
 
     # ERROR HANDLING 3: Check if there is any data associated with user
     projects = Project.objects.select_related('course__category__user').filter(course__category__user=request.user)
+    projects = projects.annotate(total_time_spent=Sum('log_set__time_spent')/60)
     if not projects.exists():
         return JsonResponse({'results': {},
                              "message": f"{NAME_FOR_MESSAGES} not retrieved. User has not created any projects yet."})

@@ -64,6 +64,10 @@ class Category(models.Model):
             "name": self.name,
             "description": self.description,
             "user": self.user.email,
+            "total_time_spent": self.total_time_spent,
+            "total_courses": self.total_courses,
+            "finished_courses": self.finished_courses,
+            "hours_forecast": self.hours_forecast,
         }
 
 
@@ -110,7 +114,7 @@ class Course(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES) # Course status will inform if course is finished, started or not started.
     #
     # Relations
-    category = models.ForeignKey(Category, on_delete=models.PROTECT)
+    category = models.ForeignKey(Category, on_delete=models.PROTECT, related_name="course_set")
     term = models.ForeignKey(Term, null=True, blank=True, on_delete=models.SET_NULL)
 
     def __str__(self):
@@ -125,6 +129,11 @@ class Course(models.Model):
             "status": self.status,
             "category": self.category.pk,
             "user": self.category.user.email,
+            "total_lectures": self.total_lectures,
+            "finished_lectures": self.finished_lectures,
+            "total_projects": self.total_projects,
+            "finished_projects": self.finished_projects,
+            "total_time_spent": self.total_time_spent,
         }
 
 class CourseSection(models.Model):
@@ -137,7 +146,7 @@ class CourseSection(models.Model):
     status = models.CharField(max_length=2, choices=STATUS_CHOICES) # Lecture status will tell if course content is finished, started or not started.    
     #
     # Relations
-    course = models.ForeignKey(Course, on_delete=models.PROTECT)
+    course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name = "coursesection_set")
 
     def __str__(self):
         return f"{self.course.name}: {self.name}"
@@ -147,10 +156,11 @@ class CourseSection(models.Model):
             "id": self.pk,
             "name": self.name,
             "website": self.website,
-            "status": self.status,
+            "status": self.get_status_display(),
             "course": self.course.pk,
             "category": self.course.category.pk,
             "user": self.course.category.user.email,
+            "total_time_spent": self.total_time_spent,
         }
 
 
@@ -191,7 +201,7 @@ class Log(models.Model):
     time_spent = models.PositiveIntegerField(null=True, blank=True)
     #
     # Relations
-    course_section = models.ForeignKey(CourseSection, on_delete=models.PROTECT)
+    course_section = models.ForeignKey(CourseSection, on_delete=models.PROTECT, related_name = 'log_set')
 
     def __str__(self):
         return f"{self.course_section}: {self.type}, {self.content}"

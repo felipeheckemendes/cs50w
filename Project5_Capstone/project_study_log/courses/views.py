@@ -12,3 +12,11 @@ def index(request):
     return render(request, "index.html", {
         'username': request.user.username
     })
+
+
+def course(request, course_id):
+    return render(request, "course.html", {
+        'username': request.user.username,
+        'course_id': course_id,
+        'course_name': Course.objects.get(pk=course_id).name
+    })
