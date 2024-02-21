@@ -33,8 +33,6 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     document.querySelector('#coursesexample').append(category_section)
 
-    document.querySelector('#coursesexample').append(buildCourseSectionHTML(lecture_list[0]))
-
     //THIS COMMENTED CODE CREATES ONE OBJECT OF EACH MODEL
     /*
     let category_id = null

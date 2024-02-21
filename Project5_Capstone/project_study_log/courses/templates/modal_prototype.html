@@ -1,0 +1,64 @@
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+    Launch static backdrop modal
+  </button>
+  
+  <!-- Modal -->
+  <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h1 class="modal-title fs-5" id="staticBackdropLabel">Create a new Log</h1>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          
+          <div class="container mt-5">
+              <h2>Create New Log</h2>
+              <form>
+                  <!-- Lecture ID (hidden field) -->
+                  <input type="hidden" name="lecture_id" value="YOUR_LECTURE_ID_HERE">
+          
+                  <!-- Type Dropdown -->
+                  <div class="mb-3">
+                      <label for="logType" class="form-label">Type</label>
+                      <select class="form-select" id="logType" name="logType" required>
+                          <option value="" selected disabled>Select Type</option>
+                          <option value="ST">Start</option>
+                          <option value="VS">View Session</option>
+                          <option value="EX">Exercise</option>
+                          <option value="WS">Work Session</option>
+                          <option value="RV">Review</option>
+                          <option value="RD">Reading</option>
+                          <option value="OT">Other</option>
+                          <option value="FI">Finish</option>
+                      </select>
+                  </div>
+          
+                  <!-- Content Text Field -->
+                  <div class="mb-3">
+                      <label for="logContent" class="form-label">Content</label>
+                      <textarea class="form-control" id="logContent" name="logContent" rows="3" required></textarea>
+                  </div>
+          
+                  <!-- Time Spent Field -->
+                  <div class="mb-3">
+                      <label for="timeSpent" class="form-label">Time Spent (minutes)</label>
+                      <input type="number" class="form-control" id="timeSpent" name="timeSpent" required>
+                  </div>
+          
+                  <!-- Submit Button -->
+                  <button type="submit" class="btn btn-primary">Submit</button>
+              </form>
+          </div>
+          
+          
+          
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary">Understood</button>
+        </div>
+      </div>
+    </div>
+  </div>

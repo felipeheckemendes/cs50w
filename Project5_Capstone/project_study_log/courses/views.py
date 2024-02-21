@@ -18,5 +18,6 @@ def course(request, course_id):
     return render(request, "course.html", {
         'username': request.user.username,
         'course_id': course_id,
-        'course_name': Course.objects.get(pk=course_id).name
+        'course_name': Course.objects.get(pk=course_id).name,
+        'course_website': Course.objects.get(pk=course_id).website,
     })

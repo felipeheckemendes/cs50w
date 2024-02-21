@@ -149,7 +149,7 @@ class CourseSection(models.Model):
     course = models.ForeignKey(Course, on_delete=models.PROTECT, related_name = "coursesection_set")
 
     def __str__(self):
-        return f"{self.course.name}: {self.name}"
+        return f"({self.pk}) {self.course.name}: {self.name}"
     
     def serialize(self, user):
         return {
@@ -204,13 +204,13 @@ class Log(models.Model):
     course_section = models.ForeignKey(CourseSection, on_delete=models.PROTECT, related_name = 'log_set')
 
     def __str__(self):
-        return f"{self.course_section}: {self.type}, {self.content}"
+        return f"({self.pk}) {self.course_section}: {self.type}, {self.content}"
     
     def serialize(self, user):
         return {
             "id": self.pk,
-            "type": self.type,
-            "date": self.date,
+            "type": self.get_type_display(),
+            "date": self.date.strftime("%Y %b %d : %H:%M"),
             "content": self.content,
             "time_spent": self.time_spent,
             "course_section": self.course_section.pk,

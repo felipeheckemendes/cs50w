@@ -28,7 +28,7 @@ async function getObjects(Model){
     return fetch(url_list[Model])
     .then(response => {
         if (response.status !== 200) {console.log(response.status)}
-        else {console.log(response.status); return response.json()}
+        else {return response.json()}
     })
 }
 
@@ -300,7 +300,6 @@ async function createProject(name, website, status, course_id){
 async function createLog(type, content, time_spent, course_section_id){ 
     let response = null;
     let data = null;
-
     try {
         // Try to get a response from server for the fetch request.
         response = await fetch('/create_log', {  
@@ -571,11 +570,10 @@ function buildCourseSectionHTML(course_section) {
         status_div.className = "col-auto py-2 px-3"
         status_div.append(status)
 
-        console.log(status_div)
-
         // Create website link anchor
         let website_link = document.createElement('a')
         website_link.href = course_section.website
+        website_link.setAttribute("target", "_blank")
         website_link.innerHTML = "Website"
 
         // Create Course section Title
@@ -590,23 +588,113 @@ function buildCourseSectionHTML(course_section) {
         course_section_title_div = document.createElement('div')
         course_section_title_div.className = "col-auto pt-2 pb-0 px-3"
         course_section_title_div.append(course_section_title)
-        
-        console.log(course_section_title_div)
 
+
+// Create "Create New Log" button as a Bootstrap badge inside a col
+let createLogButtonCol = document.createElement('div');
+createLogButtonCol.className = 'col-auto ms-auto py-2 px-3';
+
+let createLogButton = document.createElement('button');
+createLogButton.className = 'btn badge bg-primary mx-auto   '; // Use Bootstrap badge classes
+createLogButton.style.cursor = 'pointer'; // Set cursor to pointer to indicate it's clickable
+createLogButton.innerHTML = '<span class="fw-bold">+</span>';
+
+createLogButtonCol.appendChild(createLogButton);
+
+// Add a click event listener to the button to handle the log creation
+createLogButton.addEventListener('click', function () {
+    // Extract the course-section-id property from the card
+    const lectureId = course_section.id; // Assuming id is the lecture ID
+
+    // Call the createNewLogModal function with the extracted lecture ID
+    const modal = createNewLogModal(lectureId);
+
+    // Display the modal (assuming you are using Bootstrap modal)
+
+});
+
+        
         // Create course section row
         course_section_row = document.createElement('div')
         course_section_row.className = "row d-flex p-0 g-0"
-        course_section_row.append(course_section_title_div, status_div)
+        course_section_row.append(course_section_title_div, status_div, createLogButtonCol)
 
         // Create course section card div
         course_section_card_div = document.createElement('div')
         course_section_card_div.className = "card mb-1"
-        course_section_card_div.setAttribute('data-course-id', course_section.id)
+        course_section_card_div.setAttribute('data-course-section-id', course_section.id)
         course_section_card_div.append(course_section_row)
+        course_section_card_div.id = "course-section-" + course_section.id
 
-        console.log(course_section_card_div)
         return course_section_card_div
+    }
 
+
+function buildLogHTML(log) {
+    /**Create an HTML object with the log
+     * Parameters:
+     * @argument {log} is a JSON object that represents the log. 
+     * Should contain the following fields:
+     * id, type, date, content, time_spent,
+     * course_section, course, category, user
+     * @returns {HTML object} An HTML object that can be appended to document
+     */
+       
+        CHECK_ICON_SRC = document.body.dataset.iconUrl
+
+        // Create check icon element
+        let check_icon = document.createElement('img');
+        check_icon.className = "pe-2"
+        check_icon.setAttribute('alt', ".")
+        check_icon.setAttribute('src', CHECK_ICON_SRC)
+        
+        // Create content div
+        let log_content = document.createElement('span')
+        log_content.innerHTML += log.content
+        
+        let log_content_div = document.createElement('div')
+        log_content_div.className = "col-auto py-2 px-3"
+        log_content_div.append(log_content)
+
+
+        // Create Log type
+        let log_type = document.createElement('p')
+        log_type.className = "pb-2 m-0"
+        log_type.innerHTML = log.type
+
+        // Create Log date
+        let log_date = document.createElement('p')
+        log_date.className = "pb-2 m-0 text-muted small"
+        log_date.innerHTML = log.date
+        
+        // Create Log type div
+        log_type_div = document.createElement('div')
+        log_type_div.className = "col-4 border-end pt-2 pb-0 px-3 text-center bg-light"
+        log_type_div.append(log_date, log_type)
+
+        // Create Log time spent
+        let log_time_spent = document.createElement('p')
+        log_time_spent.className = "pb-2 m-0 text-muted"
+        log_time_spent.innerHTML = log.time_spent + " min"
+        
+        // Create Log time_spent div
+        log_time_spent_div = document.createElement('div')
+        log_time_spent_div.className = "col-3 border-start pt-2 pb-0 px-3 text-center ms-auto"
+        log_time_spent_div.append(log_time_spent)
+        
+
+        // Create log row
+        log_row = document.createElement('div')
+        log_row.className = "row d-flex p-0 g-0"
+        log_row.append(log_type_div, log_content_div, log_time_spent_div)
+
+        // Create log card div
+        log_card_div = document.createElement('div')
+        log_card_div.className = "card mb-1"
+        log_card_div.setAttribute('data-log-id', log.id)
+        log_card_div.append(log_row)
+
+        return log_card_div
     }
     
 
@@ -615,6 +703,7 @@ function buildCourseSectionHTML(course_section) {
 function addCollapse(parent_card, child_element){
     COLLAPSE_ICON_SRC = document.body.dataset.collapseUrl
     parent_id = parent_card.id
+
     // Create button_img
     let button_img = document.createElement('img')
     button_img.setAttribute('alt', ".")

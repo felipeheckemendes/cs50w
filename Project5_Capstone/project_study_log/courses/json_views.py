@@ -250,42 +250,51 @@ def create_log(request):
         - A status code depending on the success of database addition.
         - A message telling if the log was successfully created or not, and the reason why not.
     """
+    print("FUNCTION CREATE LOG STARTED")
     NAME_FOR_MESSAGES = "Log"
     # ERROR HANDLING 1: If method is not POST, return 400 with error message
     if request.method != "POST":
+        print("ERROR 0")
         return JsonResponse({"message": "POST request required."}, status=400)
     
     # ERROR HANDLING 2: Check if user is not logged in
     if not request.user.is_authenticated:
+        print("ERROR 1")
         return JsonResponse({"message": f"{NAME_FOR_MESSAGES} creation failed: you must log in before creating a new {NAME_FOR_MESSAGES}."}, status=400)
     
     # ERROR HANDLING 3: Try to convert the POST body to a python dictionary
     try:
         data = json.loads(request.body)
     except:
+        print("ERROR 2")
         return JsonResponse({"message": "Invalid or empty JSON."}, status=400)
     
     # ERROR HANDLING 4: Check if type is not None
     if data.get("type") not in ['ST', 'VS', 'EX', 'WS', 'RV', 'RD', 'OT', 'FI']:
+        print("ERROR 3")
         return JsonResponse({"message": f"{NAME_FOR_MESSAGES} not created. Type must not be one of the options on the list."}, status=400)
         
     # ERROR HANDLING 5: Check if there was provided a course_section_id of an existing course_section to which attach the course.
     if not CourseSection.objects.filter(pk=data.get("course_section_id")).exists():
+        print("ERROR 4")
         return JsonResponse({"message": f"{NAME_FOR_MESSAGES} not created. Lecture or Project does not exist on the database or not provided."}, status=400)
     
     # ERROR HANDLING 6: Check if lecture/project to which the course will be attached belongs to current user.
     if not CourseSection.objects.get(pk=data.get("course_section_id")).course.category.user == request.user:
+        print("ERROR 5")
         return JsonResponse({"message": f"{NAME_FOR_MESSAGES} not created. Lecture or Project does not belong to current user."}, status=400)
 
     # ERRO HANDLING 7: Check if time spent is positive integer
     if data.get("time_spent") != None:
-        if not isinstance(data.get("time_spent"), int) or data.get("time_spent") < 0:
+        print(data)
+        if not isinstance(int(data.get("time_spent")), int) or int(data.get("time_spent")) < 0:
+            print("ERROR 6")
             return JsonResponse({"message": f"{NAME_FOR_MESSAGES} not created. {NAME_FOR_MESSAGES}'s forecasted duration must be a whole number."}, status=400)
 
     # Add new log to database and return 201.
     type = data.get("type")
     content = data.get("content")
-    time_spent = data.get("time_spent")
+    time_spent = int(data.get("time_spent"))
     course_section_id = data.get("course_section_id")
     log = Log(type=type, 
               content=content, 
@@ -293,6 +302,7 @@ def create_log(request):
               course_section=CourseSection.objects.get(pk=course_section_id), 
               )
     log.save()
+    print("ERROR 7")
     return JsonResponse({"message": f"{NAME_FOR_MESSAGES} created with success.", "id": log.id}, status=201)
 
 

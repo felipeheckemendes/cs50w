@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block script %}
-    <script src="{% static 'courses/course.js' %}"></script>
+<script src="{% static 'courses/course.js' %}"></script>
+<script src="{% static 'courses/modals.js' %}"></script>
 {% endblock %}
 
     {% block body %}
@@ -11,6 +12,10 @@
             <p> </p>
             <h5 class="display-5">{{course_name}}</h5>
             <div id="course" data-course-id="{{ course_id }}" class="col">
+                <div id="website">
+                    <h4>Website:</h4>
+                    <p><a href="{{ course_website }}" target="_blank">Go to course website</a></p>
+                </div>
                 <div id="lectures">
                     <h4>Lectures:</h4>
                 </div>
@@ -19,5 +24,14 @@
                 </div>
             </div>
         </div>
+        
+
+
+<!-- Button trigger modal -->
+<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+    Add new Log
+  </button>
+
+
 
     {% endblock %}
